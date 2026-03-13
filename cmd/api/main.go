@@ -32,7 +32,7 @@ func main() {
 	container := appsetup.NewContainer(db)
 
 	router := gin.Default()
-	routes.SetupRoutes(router, container.ExampleHandler)
+	routes.SetupRoutes(router, container)
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.ServerPort,
