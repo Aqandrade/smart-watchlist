@@ -7,5 +7,7 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine, container *appsetup.Container) {
-	_ = router.Group("/v1")
+	v1 := router.Group("/v1")
+
+	v1.POST("/watchlist", container.WatchlistHandler.AddMovie)
 }
