@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -20,11 +21,18 @@ var errorStatusMap = map[error]int{
 }
 
 type WatchlistHandler struct {
-	addMovieUseCase *usecases.AddMovieToWatchlistUseCase
+	addMovieUseCase      *usecases.AddMovieToWatchlistUseCase
+	listWatchlistUseCase *usecases.ListWatchlistUseCase
 }
 
-func NewWatchlistHandler(addMovieUseCase *usecases.AddMovieToWatchlistUseCase) *WatchlistHandler {
-	return &WatchlistHandler{addMovieUseCase: addMovieUseCase}
+func NewWatchlistHandler(
+	addMovieUseCase *usecases.AddMovieToWatchlistUseCase,
+	listWatchlistUseCase *usecases.ListWatchlistUseCase,
+) *WatchlistHandler {
+	return &WatchlistHandler{
+		addMovieUseCase:      addMovieUseCase,
+		listWatchlistUseCase: listWatchlistUseCase,
+	}
 }
 
 func (h *WatchlistHandler) AddMovie(c *gin.Context) {
@@ -56,4 +64,38 @@ func (h *WatchlistHandler) mapErrorToStatus(err error) int {
 		}
 	}
 	return http.StatusInternalServerError
+}
+
+func (h *WatchlistHandler) List(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+	items, total, err := h.listWatchlistUseCase.Execute(c.Request.Context(), page, pageSize)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	responseItems := make([]responses.WatchlistItemResponse, 0, len(items))
+	for _, item := range items {
+		responseItems = append(responseItems, responses.WatchlistItemResponse{
+			EntityID:             item.EntityID,
+			MovieName:            item.MovieName,
+			MovieDescription:     item.MovieDescription,
+			MovieDirector:        item.MovieDirector,
+			MovieReleaseDate:     item.MovieReleaseDate,
+			MovieDuration:        item.MovieDuration,
+			ExternalSourceRating: item.ExternalSourceRating,
+			Status:               string(item.Status),
+			Providers:            item.Providers,
+			CreatedAt:            item.CreatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, responses.ListWatchlistResponse{
+		Items:      responseItems,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalItems: total,
+	})
 }
