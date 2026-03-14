@@ -1,0 +1,53 @@
+{
+    "name": "smart-watchlist",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+        "@phosphor-icons/react": "^2.0.10",
+        "@testing-library/jest-dom": "^5.16.5",
+        "@testing-library/react": "^13.4.0",
+        "@testing-library/user-event": "^13.5.0",
+        "@types/jest": "^27.5.2",
+        "@types/node": "^16.18.38",
+        "@types/react": "^18.2.14",
+        "@types/react-dom": "^18.2.6",
+        "axios": "^1.6.2",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^6.14.1",
+        "react-scripts": "5.0.1",
+        "recoil": "^0.7.7",
+        "styled-components": "^6.0.1",
+        "typescript": "*",
+        "web-vitals": "^2.1.4"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject",
+        "first-install": "yarn install && husky install"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^17.6.6",
+        "@commitlint/config-conventional": "^17.6.6",
+        "husky": "^8.0.3",
+        "prettier": "^2.8.8"
+    },
+    "resolutions": {
+        "styled-components": "^5"
+    }
+}

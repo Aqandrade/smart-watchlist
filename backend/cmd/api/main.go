@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	appsetup "github.com/Aqandrade/smart-watchlist/config/application"
@@ -36,6 +37,13 @@ func main() {
 	})
 
 	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: false,
+	}))
+
 	routes.SetupRoutes(router, container)
 
 	srv := &http.Server{
