@@ -8,6 +8,7 @@ export const Container = styled.div`
     gap: ${formatPxToRem(16)}rem;
 
     padding-top: ${formatPxToRem(8)}rem;
+    padding-right: ${formatPxToRem(32)}rem;
 `;
 
 export const Header = styled.div`
