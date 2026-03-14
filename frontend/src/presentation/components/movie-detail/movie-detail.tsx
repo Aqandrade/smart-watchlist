@@ -109,18 +109,22 @@ export const MovieDetail: React.FC<IMovieDetail> = ({
 
             <Divider />
 
-            <Text size="14" weight="500">
-                Disponível em
-            </Text>
-            <Providers>
-                {providers.map((provider) => (
-                    <ProviderBadge key={provider}>
-                        <Text size="10" weight="500" color="white-default">
-                            {provider}
-                        </Text>
-                    </ProviderBadge>
-                ))}
-            </Providers>
+            {providers && providers.length > 0 && (
+                <>
+                    <Text size="14" weight="500">
+                        Disponível em
+                    </Text>
+                    <Providers>
+                        {providers.map((provider) => (
+                            <ProviderBadge key={provider}>
+                                <Text size="10" weight="500" color="white-default">
+                                    {provider}
+                                </Text>
+                            </ProviderBadge>
+                        ))}
+                    </Providers>
+                </>
+            )}
 
             <Text size="10" weight="400" color="neutrals-weak">
                 Adicionado em {formattedDate}

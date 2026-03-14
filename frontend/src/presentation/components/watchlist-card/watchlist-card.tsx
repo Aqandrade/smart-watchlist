@@ -74,15 +74,17 @@ export const WatchlistCard: React.FC<IWatchlistCard> = ({
                     </MetaItem>
                 </MovieMeta>
 
-                <Providers>
-                    {providers.map((provider) => (
-                        <ProviderBadge key={provider}>
-                            <Text size="10" weight="500" color="white-default">
-                                {provider}
-                            </Text>
-                        </ProviderBadge>
-                    ))}
-                </Providers>
+                {providers && providers.length > 0 && (
+                    <Providers>
+                        {providers.map((provider) => (
+                            <ProviderBadge key={provider}>
+                                <Text size="10" weight="500" color="white-default">
+                                    {provider}
+                                </Text>
+                            </ProviderBadge>
+                        ))}
+                    </Providers>
+                )}
             </MovieInfo>
 
             <RatingWrapper>
