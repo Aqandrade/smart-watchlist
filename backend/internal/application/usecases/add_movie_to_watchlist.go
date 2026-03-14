@@ -9,6 +9,7 @@ import (
 
 	"github.com/Aqandrade/smart-watchlist/internal/application/ports"
 	"github.com/Aqandrade/smart-watchlist/internal/domain/entities"
+	"github.com/Aqandrade/smart-watchlist/internal/domain/services"
 )
 
 const hardcodedUserID = 1
@@ -19,6 +20,7 @@ type AddMovieToWatchlistUseCase struct {
 	providerRepo           ports.ProviderRepository
 	movieWatchProviderRepo ports.MovieWatchProviderRepository
 	movieProvider          ports.MovieDataProvider
+	movieSelector          *services.MovieSelector
 }
 
 func NewAddMovieToWatchlistUseCase(
@@ -27,6 +29,7 @@ func NewAddMovieToWatchlistUseCase(
 	providerRepo ports.ProviderRepository,
 	movieWatchProviderRepo ports.MovieWatchProviderRepository,
 	movieProvider ports.MovieDataProvider,
+	movieSelector *services.MovieSelector,
 ) *AddMovieToWatchlistUseCase {
 	return &AddMovieToWatchlistUseCase{
 		movieRepo:              movieRepo,
@@ -34,6 +37,7 @@ func NewAddMovieToWatchlistUseCase(
 		providerRepo:           providerRepo,
 		movieWatchProviderRepo: movieWatchProviderRepo,
 		movieProvider:          movieProvider,
+		movieSelector:          movieSelector,
 	}
 }
 
@@ -69,23 +73,33 @@ func (uc *AddMovieToWatchlistUseCase) Execute(ctx context.Context, movieName str
 }
 
 func (uc *AddMovieToWatchlistUseCase) createMovieFromProvider(ctx context.Context, movieName string) (*entities.Movie, error) {
-	detail, err := uc.movieProvider.SearchMovie(ctx, movieName)
+	results, err := uc.movieProvider.SearchMovies(ctx, movieName)
 	if err != nil {
 		return nil, err
 	}
 
-	releaseYear := uc.parseReleaseYear(detail.ReleaseDate)
+	selected, err := uc.movieSelector.SelectByExactName(results, movieName)
+	if err != nil {
+		return nil, err
+	}
+
+	detail, err := uc.movieProvider.GetMovieDetails(ctx, selected.ExternalID)
+	if err != nil {
+		return nil, err
+	}
+
+	releaseYear := uc.parseReleaseYear(selected.ReleaseDate)
 
 	movie := &entities.Movie{
 		EntityID:             uuid.NewString(),
-		Name:                 detail.Title,
-		Description:          detail.Overview,
+		Name:                 selected.Title,
+		Description:          selected.Overview,
 		Director:             detail.Director,
 		ReleaseDate:          releaseYear,
 		Duration:             int16(detail.Runtime),
 		ExternalSource:       "TMDB",
-		ExternalSourceID:     detail.ID,
-		ExternalSourceRating: detail.VoteAverage,
+		ExternalSourceID:     selected.ExternalID,
+		ExternalSourceRating: selected.VoteAverage,
 	}
 
 	movie, err = uc.movieRepo.Create(ctx, movie)
@@ -93,7 +107,7 @@ func (uc *AddMovieToWatchlistUseCase) createMovieFromProvider(ctx context.Contex
 		return nil, err
 	}
 
-	uc.createWatchProviders(ctx, movie.ID, detail.ID)
+	uc.createWatchProviders(ctx, movie.ID, selected.ExternalID)
 
 	return movie, nil
 }

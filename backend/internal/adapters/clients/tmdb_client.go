@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/Aqandrade/smart-watchlist/internal/adapters/clients/dto"
@@ -28,45 +27,52 @@ func NewTMDBClient(baseURL, apiKey string) ports.MovieDataProvider {
 	}
 }
 
-func (c *tmdbClient) SearchMovie(ctx context.Context, name string) (*ports.MovieDetail, error) {
+func (c *tmdbClient) SearchMovies(ctx context.Context, name string) ([]entities.MovieSearchResult, error) {
 	searchURL := fmt.Sprintf("%s/search/movie?query=%s&language=pt-BR", c.baseURL, url.QueryEscape(name))
 
-	searchResult, err := c.doRequest(ctx, searchURL)
+	resp, err := c.doRequest(ctx, searchURL)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", entities.ErrProviderUnavailable, err.Error())
 	}
-	defer searchResult.Body.Close()
+	defer resp.Body.Close()
 
 	var searchResp dto.TMDBSearchResponse
-	if err := json.NewDecoder(searchResult.Body).Decode(&searchResp); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&searchResp); err != nil {
 		return nil, fmt.Errorf("%w: failed to decode search response", entities.ErrProviderUnavailable)
 	}
 
-	movie := c.findExactMatch(searchResp.Results, name)
-	if movie == nil {
-		return nil, entities.ErrMovieNotFoundOnProvider
+	results := make([]entities.MovieSearchResult, 0, len(searchResp.Results))
+	for _, m := range searchResp.Results {
+		results = append(results, entities.MovieSearchResult{
+			ExternalID:  m.ID,
+			Title:       m.Title,
+			Overview:    m.Overview,
+			ReleaseDate: m.ReleaseDate,
+			VoteAverage: m.VoteAverage,
+		})
 	}
 
-	detailURL := fmt.Sprintf("%s/movie/%d?append_to_response=credits", c.baseURL, movie.ID)
-	detailResult, err := c.doRequest(ctx, detailURL)
+	return results, nil
+}
+
+func (c *tmdbClient) GetMovieDetails(ctx context.Context, movieID int64) (*ports.MovieDetail, error) {
+	detailURL := fmt.Sprintf("%s/movie/%d?append_to_response=credits", c.baseURL, movieID)
+
+	resp, err := c.doRequest(ctx, detailURL)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", entities.ErrProviderUnavailable, err.Error())
 	}
-	defer detailResult.Body.Close()
+	defer resp.Body.Close()
 
 	var detail dto.TMDBMovieDetail
-	if err := json.NewDecoder(detailResult.Body).Decode(&detail); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&detail); err != nil {
 		return nil, fmt.Errorf("%w: failed to decode detail response", entities.ErrProviderUnavailable)
 	}
 
 	return &ports.MovieDetail{
-		ID:          movie.ID,
-		Title:       movie.Title,
-		Overview:    movie.Overview,
-		ReleaseDate: movie.ReleaseDate,
-		VoteAverage: movie.VoteAverage,
-		Director:    c.extractDirector(detail.Credits.Crew),
-		Runtime:     detail.Runtime,
+		ID:       movieID,
+		Director: c.extractDirector(detail.Credits.Crew),
+		Runtime:  detail.Runtime,
 	}, nil
 }
 
@@ -117,16 +123,6 @@ func (c *tmdbClient) doRequest(ctx context.Context, requestURL string) (*http.Re
 	}
 
 	return resp, nil
-}
-
-func (c *tmdbClient) findExactMatch(movies []dto.TMDBMovie, name string) *dto.TMDBMovie {
-	normalized := strings.ToLower(strings.TrimSpace(name))
-	for i, m := range movies {
-		if strings.ToLower(strings.TrimSpace(m.Title)) == normalized {
-			return &movies[i]
-		}
-	}
-	return nil
 }
 
 func (c *tmdbClient) extractDirector(crew []dto.TMDBCrewMember) string {
