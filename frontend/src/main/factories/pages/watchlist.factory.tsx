@@ -2,6 +2,7 @@ import { Watchlist } from "../../../presentation/pages/watchlist/watchlist";
 import {
     makeRemoteListWatchlist,
     makeRemoteAddMovieToWatchlist,
+    makeRemoteSearchMovies,
 } from "../usecases";
 
 export const makeWatchlistPage = () => {
@@ -9,6 +10,7 @@ export const makeWatchlistPage = () => {
         <Watchlist
             remoteListWatchlist={makeRemoteListWatchlist()}
             remoteAddMovieToWatchlist={makeRemoteAddMovieToWatchlist()}
+            remoteSearchMovies={makeRemoteSearchMovies()}
         />
     );
 };

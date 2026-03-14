@@ -33,3 +33,21 @@ export const ButtonsRow = styled.div`
 
     gap: ${formatPxToRem(12)}rem;
 `;
+
+export const ResultsList = styled.div`
+    display: flex;
+    flex-direction: column;
+
+    gap: ${formatPxToRem(8)}rem;
+
+    max-height: ${formatPxToRem(400)}rem;
+    overflow-y: auto;
+`;
+
+export const EmptyResults = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: ${formatPxToRem(24)}rem 0;
+`;

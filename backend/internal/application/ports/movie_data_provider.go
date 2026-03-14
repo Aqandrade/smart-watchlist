@@ -1,6 +1,10 @@
 package ports
 
-import "context"
+import (
+	"context"
+
+	"github.com/Aqandrade/smart-watchlist/internal/domain/entities"
+)
 
 type MovieDetail struct {
 	ID          int64
@@ -17,6 +21,7 @@ type WatchProviderEntry struct {
 }
 
 type MovieDataProvider interface {
-	SearchMovie(ctx context.Context, name string) (*MovieDetail, error)
+	SearchMovies(ctx context.Context, name string) ([]entities.MovieSearchResult, error)
+	GetMovieDetails(ctx context.Context, movieID int64) (*MovieDetail, error)
 	GetWatchProviders(ctx context.Context, movieID int64) ([]WatchProviderEntry, error)
 }

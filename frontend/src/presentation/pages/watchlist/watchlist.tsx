@@ -28,6 +28,7 @@ import { defaultTheme } from "../../themes/themes";
 export const Watchlist: React.FC<IWatchlist> = ({
     remoteListWatchlist,
     remoteAddMovieToWatchlist,
+    remoteSearchMovies,
 }) => {
     const [pageState, setPageState] = useState<PageState>("loading");
     const [items, setItems] = useState<WatchlistItemModel[]>([]);
@@ -191,6 +192,7 @@ export const Watchlist: React.FC<IWatchlist> = ({
                 <AddMovieForm
                     onSubmit={handleAddMovie}
                     onCancel={() => setIsAddModalOpen(false)}
+                    remoteSearchMovies={remoteSearchMovies}
                 />
             </Modal>
         </Container>
