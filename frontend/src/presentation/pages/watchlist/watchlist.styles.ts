@@ -20,18 +20,18 @@ export const Header = styled.div`
     display: flex;
     flex-direction: column;
 
-    min-height: 20vh;
+    min-height: 12vh;
 
     width: 100%;
 
-    padding: ${formatPxToRem(30)}rem ${formatPxToRem(26)}rem;
+    padding: ${formatPxToRem(24)}rem ${formatPxToRem(26)}rem;
 
     background-color: ${({ theme }) => theme.colors.purple.default};
 `;
 
 export const Welcome = styled.div`
     display: flex;
-    margin-bottom: ${formatPxToRem(36)}rem;
+    margin-bottom: ${formatPxToRem(16)}rem;
 `;
 
 export const CustomText = styled(Text)`
@@ -91,4 +91,19 @@ export const LoadingWrapper = styled.div`
     justify-content: center;
 
     padding: ${formatPxToRem(60)}rem 0;
+`;
+
+export const AddButton = styled.button`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: ${formatPxToRem(8)}rem;
+
+    border: none;
+    background: none;
+
+    cursor: pointer;
+
+    color: ${({ theme }) => theme.colors.purple.default};
 `;

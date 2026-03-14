@@ -1,5 +1,9 @@
-import { ListWatchlistCase } from "../../../domain/usecases";
+import {
+    ListWatchlistCase,
+    AddMovieToWatchlistCase,
+} from "../../../domain/usecases";
 
 export interface IWatchlist {
     remoteListWatchlist: ListWatchlistCase;
+    remoteAddMovieToWatchlist: AddMovieToWatchlistCase;
 }

@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
+import { Plus } from "@phosphor-icons/react";
 import { Text } from "../../components/text/text";
 import { Loading } from "../../components/loading/loading";
 import { WatchlistCard } from "../../components/watchlist-card/watchlist-card";
 import { Pagination } from "../../components/pagination/pagination";
 import { Modal } from "../../components/modal/modal";
 import { MovieDetail } from "../../components/movie-detail/movie-detail";
+import { AddMovieForm } from "../../components/add-movie-form";
 import { WatchlistStatus } from "../../components/watchlist-card/watchlist-card.types";
 import {
     Container,
@@ -16,18 +18,24 @@ import {
     Movies,
     Welcome,
     EmptyState,
+    AddButton,
 } from "./watchlist.styles";
 import { IWatchlist } from "./watchlist.types";
 import { PageState } from "../../common/types";
 import { WatchlistItemModel } from "../../../domain/models";
+import { defaultTheme } from "../../themes/themes";
 
-export const Watchlist: React.FC<IWatchlist> = ({ remoteListWatchlist }) => {
+export const Watchlist: React.FC<IWatchlist> = ({
+    remoteListWatchlist,
+    remoteAddMovieToWatchlist,
+}) => {
     const [pageState, setPageState] = useState<PageState>("loading");
     const [items, setItems] = useState<WatchlistItemModel[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [pageSize, setPageSize] = useState(20);
     const [selectedMovie, setSelectedMovie] = useState<WatchlistItemModel | null>(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const loadWatchlist = useCallback(
         async (page: number) => {
@@ -59,6 +67,12 @@ export const Watchlist: React.FC<IWatchlist> = ({ remoteListWatchlist }) => {
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
         loadWatchlist(page);
+    };
+
+    const handleAddMovie = async (movieName: string) => {
+        await remoteAddMovieToWatchlist.add({ movie_name: movieName });
+        setIsAddModalOpen(false);
+        loadWatchlist(1);
     };
 
     const renderContent = () => {
@@ -137,6 +151,16 @@ export const Watchlist: React.FC<IWatchlist> = ({ remoteListWatchlist }) => {
                     <Text size="18" weight="500">
                         Meus Filmes
                     </Text>
+                    <AddButton onClick={() => setIsAddModalOpen(true)}>
+                        <Plus
+                            size={18}
+                            weight="bold"
+                            color={defaultTheme.colors.purple.default}
+                        />
+                        <Text size="14" weight="600" color="purple-default">
+                            Adicionar Filme
+                        </Text>
+                    </AddButton>
                 </ListHeader>
                 {renderContent()}
             </Main>
@@ -158,6 +182,16 @@ export const Watchlist: React.FC<IWatchlist> = ({ remoteListWatchlist }) => {
                         createdAt={selectedMovie.created_at}
                     />
                 )}
+            </Modal>
+
+            <Modal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+            >
+                <AddMovieForm
+                    onSubmit={handleAddMovie}
+                    onCancel={() => setIsAddModalOpen(false)}
+                />
             </Modal>
         </Container>
     );
