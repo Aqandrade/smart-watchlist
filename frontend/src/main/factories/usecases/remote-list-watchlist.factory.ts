@@ -6,7 +6,7 @@ import {
 import { makeAxiosHttpClientAdapter } from "../http";
 
 export const makeRemoteListWatchlist = (): ListWatchlistCase => {
-    const url = `${process.env.REACT_APP_API_URL}/v1/watchlist`;
+    const url = `${process.env.REACT_APP_SMART_WATCHLIST_API_URL}/v1/watchlist`;
 
     const axiosHttpClientAdapter =
         makeAxiosHttpClientAdapter<ListWatchlistSpace.Model>();
