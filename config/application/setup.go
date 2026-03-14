@@ -3,21 +3,35 @@ package application
 import (
 	"database/sql"
 
+	"github.com/Aqandrade/smart-watchlist/internal/adapters/clients"
 	"github.com/Aqandrade/smart-watchlist/internal/adapters/database/repositories"
 	"github.com/Aqandrade/smart-watchlist/internal/adapters/http/handlers"
 	"github.com/Aqandrade/smart-watchlist/internal/application/usecases"
 )
 
-type Container struct {
-	ExampleHandler *handlers.ExampleHandler
+type Config struct {
+	DB          *sql.DB
+	TMDBBaseURL string
+	TMDBAPIKey  string
 }
 
-func NewContainer(db *sql.DB) *Container {
-	exampleRepo := repositories.NewPostgresExampleRepository(db)
-	addExampleUseCase := usecases.NewAddExampleUseCase(exampleRepo)
-	exampleHandler := handlers.NewExampleHandler(addExampleUseCase)
+type Container struct {
+	WatchlistHandler *handlers.WatchlistHandler
+}
+
+func NewContainer(cfg Config) *Container {
+	movieRepo := repositories.NewMovieRepository(cfg.DB)
+	watchlistRepo := repositories.NewWatchlistRepository(cfg.DB)
+	providerRepo := repositories.NewProviderRepository(cfg.DB)
+	movieWatchProviderRepo := repositories.NewMovieWatchProviderRepository(cfg.DB)
+	tmdbClient := clients.NewTMDBClient(cfg.TMDBBaseURL, cfg.TMDBAPIKey)
+
+	addMovieUseCase := usecases.NewAddMovieToWatchlistUseCase(
+		movieRepo, watchlistRepo, providerRepo, movieWatchProviderRepo, tmdbClient,
+	)
+	listWatchlistUseCase := usecases.NewListWatchlistUseCase(watchlistRepo)
 
 	return &Container{
-		ExampleHandler: exampleHandler,
+		WatchlistHandler: handlers.NewWatchlistHandler(addMovieUseCase, listWatchlistUseCase),
 	}
 }

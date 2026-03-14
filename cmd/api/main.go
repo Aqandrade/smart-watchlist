@@ -29,10 +29,14 @@ func main() {
 	}
 	defer db.Close()
 
-	container := appsetup.NewContainer(db)
+	container := appsetup.NewContainer(appsetup.Config{
+		DB:          db,
+		TMDBBaseURL: cfg.TMDBBaseURL,
+		TMDBAPIKey:  cfg.TMDBAPIKey,
+	})
 
 	router := gin.Default()
-	routes.SetupRoutes(router, container.ExampleHandler)
+	routes.SetupRoutes(router, container)
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.ServerPort,
