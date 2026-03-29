@@ -22,20 +22,23 @@ var errorStatusMap = map[error]int{
 }
 
 type WatchlistHandler struct {
-	addMovieUseCase             *usecases.AddMovieToWatchlistUseCase
-	listWatchlistUseCase        *usecases.ListWatchlistUseCase
-	updateItemStatusUseCase     *usecases.UpdateWatchlistItemStatusUseCase
+	addMovieUseCase         *usecases.AddMovieToWatchlistUseCase
+	listWatchlistUseCase    *usecases.ListWatchlistUseCase
+	updateItemStatusUseCase *usecases.UpdateWatchlistItemStatusUseCase
+	deleteItemUseCase       *usecases.DeleteWatchlistItemUseCase
 }
 
 func NewWatchlistHandler(
 	addMovieUseCase *usecases.AddMovieToWatchlistUseCase,
 	listWatchlistUseCase *usecases.ListWatchlistUseCase,
 	updateItemStatusUseCase *usecases.UpdateWatchlistItemStatusUseCase,
+	deleteItemUseCase *usecases.DeleteWatchlistItemUseCase,
 ) *WatchlistHandler {
 	return &WatchlistHandler{
 		addMovieUseCase:         addMovieUseCase,
 		listWatchlistUseCase:    listWatchlistUseCase,
 		updateItemStatusUseCase: updateItemStatusUseCase,
+		deleteItemUseCase:       deleteItemUseCase,
 	}
 }
 
@@ -122,6 +125,18 @@ func (h *WatchlistHandler) UpdateItemStatus(c *gin.Context) {
 		Status:    string(watchlist.Status),
 		UpdatedAt: watchlist.UpdatedAt,
 	})
+}
+
+func (h *WatchlistHandler) DeleteItem(c *gin.Context) {
+	watchlistItemID := c.Param("watchlistItemId")
+
+	if err := h.deleteItemUseCase.Execute(c.Request.Context(), watchlistItemID); err != nil {
+		httpStatus := h.mapErrorToStatus(err)
+		c.JSON(httpStatus, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 func (h *WatchlistHandler) mapErrorToStatus(err error) int {

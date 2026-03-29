@@ -145,6 +145,25 @@ func (r *watchlistRepository) UpdateStatus(ctx context.Context, entityID string,
 	return &watchlist, nil
 }
 
+func (r *watchlistRepository) Delete(ctx context.Context, entityID string, userID int) error {
+	query := `DELETE FROM watchlist WHERE entity_id = $1 AND user_id = $2`
+
+	result, err := r.db.ExecContext(ctx, query, entityID, userID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return entities.ErrWatchlistNotFound
+	}
+
+	return nil
+}
+
 func (r *watchlistRepository) findProvidersByMovieIDs(ctx context.Context, movieIDs []int) (map[int][]string, error) {
 	result := make(map[int][]string)
 	if len(movieIDs) == 0 {
