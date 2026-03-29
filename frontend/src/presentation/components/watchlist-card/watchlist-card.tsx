@@ -1,4 +1,4 @@
-import { FilmSlate, Clock, Star, CalendarBlank } from "@phosphor-icons/react";
+import { FilmSlate, Clock, Star, CalendarBlank, CheckCircle, ArrowCounterClockwise, Trash } from "@phosphor-icons/react";
 import { Text } from "../text/text";
 import {
     Card,
@@ -10,6 +10,10 @@ import {
     ProviderBadge,
     StatusBadge,
     RatingWrapper,
+    CardRight,
+    CardMeta,
+    CardActions,
+    ActionButton,
 } from "./watchlist-card.styles";
 import { IWatchlistCard } from "./watchlist-card.types";
 import { getStatusColor, getStatusLabel } from "./mappers";
@@ -25,7 +29,19 @@ export const WatchlistCard: React.FC<IWatchlistCard> = ({
     status,
     providers,
     onClick,
+    onStatusChange,
+    onDelete,
 }) => {
+    const handleStatusChange = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onStatusChange?.();
+    };
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDelete?.();
+    };
+
     return (
         <Card onClick={onClick}>
             <MovieInfo>
@@ -87,22 +103,60 @@ export const WatchlistCard: React.FC<IWatchlistCard> = ({
                 )}
             </MovieInfo>
 
-            <RatingWrapper>
-                <Star
-                    color={defaultTheme.colors.yellow.default}
-                    weight="fill"
-                    size={20}
-                />
-                <Text size="14" weight="600" color="yellow-default">
-                    {externalSourceRating.toFixed(1)}
-                </Text>
-            </RatingWrapper>
+            <CardRight>
+                <CardMeta>
+                    <RatingWrapper>
+                        <Star
+                            color={defaultTheme.colors.yellow.default}
+                            weight="fill"
+                            size={20}
+                        />
+                        <Text size="14" weight="600" color="yellow-default">
+                            {externalSourceRating.toFixed(1)}
+                        </Text>
+                    </RatingWrapper>
 
-            <StatusBadge>
-                <Text size="12" weight="500" color={getStatusColor(status)}>
-                    {getStatusLabel(status)}
-                </Text>
-            </StatusBadge>
+                    <StatusBadge>
+                        <Text size="12" weight="500" color={getStatusColor(status)}>
+                            {getStatusLabel(status)}
+                        </Text>
+                    </StatusBadge>
+                </CardMeta>
+
+                <CardActions>
+                    <ActionButton
+                        variant="status"
+                        title={status === "WATCHED" ? "Marcar como Pendente" : "Marcar como Assistido"}
+                        onClick={handleStatusChange}
+                    >
+                        {status === "WATCHED" ? (
+                            <ArrowCounterClockwise
+                                color={defaultTheme.colors.green.default}
+                                weight="bold"
+                                size={16}
+                            />
+                        ) : (
+                            <CheckCircle
+                                color={defaultTheme.colors.green.default}
+                                weight="bold"
+                                size={16}
+                            />
+                        )}
+                    </ActionButton>
+
+                    <ActionButton
+                        variant="delete"
+                        title="Remover da watchlist"
+                        onClick={handleDelete}
+                    >
+                        <Trash
+                            color={defaultTheme.colors.red.default}
+                            weight="bold"
+                            size={16}
+                        />
+                    </ActionButton>
+                </CardActions>
+            </CardRight>
         </Card>
     );
 };

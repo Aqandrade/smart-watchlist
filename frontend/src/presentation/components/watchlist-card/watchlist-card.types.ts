@@ -11,4 +11,6 @@ export interface IWatchlistCard {
     providers: string[];
     createdAt: string;
     onClick?: () => void;
+    onStatusChange?: () => void;
+    onDelete?: () => void;
 }

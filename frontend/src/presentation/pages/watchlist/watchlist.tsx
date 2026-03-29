@@ -7,6 +7,7 @@ import { Pagination } from "../../components/pagination/pagination";
 import { Modal } from "../../components/modal/modal";
 import { MovieDetail } from "../../components/movie-detail/movie-detail";
 import { AddMovieForm } from "../../components/add-movie-form";
+import { ConfirmDeleteModal } from "../../components/confirm-delete-modal/confirm-delete-modal";
 import { WatchlistStatus } from "../../components/watchlist-card/watchlist-card.types";
 import {
     Container,
@@ -29,6 +30,8 @@ export const Watchlist: React.FC<IWatchlist> = ({
     remoteListWatchlist,
     remoteAddMovieToWatchlist,
     remoteSearchMovies,
+    remoteUpdateWatchlistItemStatus,
+    remoteDeleteWatchlistItem,
 }) => {
     const [pageState, setPageState] = useState<PageState>("loading");
     const [items, setItems] = useState<WatchlistItemModel[]>([]);
@@ -37,6 +40,7 @@ export const Watchlist: React.FC<IWatchlist> = ({
     const [pageSize, setPageSize] = useState(20);
     const [selectedMovie, setSelectedMovie] = useState<WatchlistItemModel | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [movieToDelete, setMovieToDelete] = useState<WatchlistItemModel | null>(null);
 
     const loadWatchlist = useCallback(
         async (page: number) => {
@@ -74,6 +78,19 @@ export const Watchlist: React.FC<IWatchlist> = ({
         await remoteAddMovieToWatchlist.add({ movie_name: movieName });
         setIsAddModalOpen(false);
         loadWatchlist(1);
+    };
+
+    const handleStatusChange = async (entityId: string, currentStatus: WatchlistStatus) => {
+        const newStatus = currentStatus === "WATCHED" ? "PENDING" : "WATCHED";
+        await remoteUpdateWatchlistItemStatus.update({ entity_id: entityId, status: newStatus });
+        loadWatchlist(currentPage);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!movieToDelete) return;
+        await remoteDeleteWatchlistItem.delete({ entity_id: movieToDelete.entity_id });
+        setMovieToDelete(null);
+        loadWatchlist(currentPage);
     };
 
     const renderContent = () => {
@@ -121,6 +138,8 @@ export const Watchlist: React.FC<IWatchlist> = ({
                             providers={item.providers}
                             createdAt={item.created_at}
                             onClick={() => setSelectedMovie(item)}
+                            onStatusChange={() => handleStatusChange(item.entity_id, item.status as WatchlistStatus)}
+                            onDelete={() => setMovieToDelete(item)}
                         />
                     ))}
                 </Movies>
@@ -194,6 +213,19 @@ export const Watchlist: React.FC<IWatchlist> = ({
                     onCancel={() => setIsAddModalOpen(false)}
                     remoteSearchMovies={remoteSearchMovies}
                 />
+            </Modal>
+
+            <Modal
+                isOpen={!!movieToDelete}
+                onClose={() => setMovieToDelete(null)}
+            >
+                {movieToDelete && (
+                    <ConfirmDeleteModal
+                        movieName={movieToDelete.movie_name}
+                        onConfirm={handleConfirmDelete}
+                        onCancel={() => setMovieToDelete(null)}
+                    />
+                )}
             </Modal>
         </Container>
     );
