@@ -33,10 +33,11 @@ func NewContainer(cfg Config) *Container {
 		movieRepo, watchlistRepo, providerRepo, movieWatchProviderRepo, tmdbClient, movieSelector,
 	)
 	listWatchlistUseCase := usecases.NewListWatchlistUseCase(watchlistRepo)
+	updateItemStatusUseCase := usecases.NewUpdateWatchlistItemStatusUseCase(watchlistRepo)
 	searchMoviesUseCase := usecases.NewSearchMoviesUseCase(tmdbClient)
 
 	return &Container{
-		WatchlistHandler: handlers.NewWatchlistHandler(addMovieUseCase, listWatchlistUseCase),
+		WatchlistHandler: handlers.NewWatchlistHandler(addMovieUseCase, listWatchlistUseCase, updateItemStatusUseCase),
 		MovieHandler:     handlers.NewMovieHandler(searchMoviesUseCase),
 	}
 }

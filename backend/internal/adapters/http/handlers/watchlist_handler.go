@@ -18,20 +18,24 @@ var errorStatusMap = map[error]int{
 	entities.ErrProviderUnavailable:     http.StatusFailedDependency,
 	entities.ErrWatchProviderNotFound:   http.StatusFailedDependency,
 	entities.ErrMovieAlreadyInWatchlist: http.StatusConflict,
+	entities.ErrWatchlistNotFound:       http.StatusNotFound,
 }
 
 type WatchlistHandler struct {
-	addMovieUseCase      *usecases.AddMovieToWatchlistUseCase
-	listWatchlistUseCase *usecases.ListWatchlistUseCase
+	addMovieUseCase             *usecases.AddMovieToWatchlistUseCase
+	listWatchlistUseCase        *usecases.ListWatchlistUseCase
+	updateItemStatusUseCase     *usecases.UpdateWatchlistItemStatusUseCase
 }
 
 func NewWatchlistHandler(
 	addMovieUseCase *usecases.AddMovieToWatchlistUseCase,
 	listWatchlistUseCase *usecases.ListWatchlistUseCase,
+	updateItemStatusUseCase *usecases.UpdateWatchlistItemStatusUseCase,
 ) *WatchlistHandler {
 	return &WatchlistHandler{
-		addMovieUseCase:      addMovieUseCase,
-		listWatchlistUseCase: listWatchlistUseCase,
+		addMovieUseCase:         addMovieUseCase,
+		listWatchlistUseCase:    listWatchlistUseCase,
+		updateItemStatusUseCase: updateItemStatusUseCase,
 	}
 }
 
@@ -55,15 +59,6 @@ func (h *WatchlistHandler) AddMovie(c *gin.Context) {
 		Status:    string(watchlist.Status),
 		CreatedAt: watchlist.CreatedAt,
 	})
-}
-
-func (h *WatchlistHandler) mapErrorToStatus(err error) int {
-	for sentinel, status := range errorStatusMap {
-		if errors.Is(err, sentinel) {
-			return status
-		}
-	}
-	return http.StatusInternalServerError
 }
 
 func (h *WatchlistHandler) List(c *gin.Context) {
@@ -98,4 +93,42 @@ func (h *WatchlistHandler) List(c *gin.Context) {
 		PageSize:   pageSize,
 		TotalItems: total,
 	})
+}
+
+func (h *WatchlistHandler) UpdateItemStatus(c *gin.Context) {
+	watchlistItemID := c.Param("watchlistItemId")
+
+	var req requests.UpdateWatchlistItemStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "status is required"})
+		return
+	}
+
+	status := entities.WatchlistStatus(req.Status)
+	if status != entities.WatchlistStatusPending && status != entities.WatchlistStatusWatched {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status, accepted values: PENDING, WATCHED"})
+		return
+	}
+
+	watchlist, err := h.updateItemStatusUseCase.Execute(c.Request.Context(), watchlistItemID, status)
+	if err != nil {
+		httpStatus := h.mapErrorToStatus(err)
+		c.JSON(httpStatus, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.UpdateWatchlistItemStatusResponse{
+		EntityID:  watchlist.EntityID,
+		Status:    string(watchlist.Status),
+		UpdatedAt: watchlist.UpdatedAt,
+	})
+}
+
+func (h *WatchlistHandler) mapErrorToStatus(err error) int {
+	for sentinel, status := range errorStatusMap {
+		if errors.Is(err, sentinel) {
+			return status
+		}
+	}
+	return http.StatusInternalServerError
 }

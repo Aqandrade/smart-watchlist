@@ -11,5 +11,6 @@ func SetupRoutes(router *gin.Engine, container *appsetup.Container) {
 
 	v1.POST("/watchlist", container.WatchlistHandler.AddMovie)
 	v1.GET("/watchlist", container.WatchlistHandler.List)
+	v1.PATCH("/watchlist/:watchlistItemId", container.WatchlistHandler.UpdateItemStatus)
 	v1.GET("/movies/search", container.MovieHandler.Search)
 }
