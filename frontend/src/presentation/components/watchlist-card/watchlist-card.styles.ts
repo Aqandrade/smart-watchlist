@@ -98,3 +98,61 @@ export const RatingWrapper = styled.div`
 
     white-space: nowrap;
 `;
+
+export const CardRight = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: ${formatPxToRem(12)}rem;
+
+    @media (max-width: 768px) {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+    }
+`;
+
+export const CardMeta = styled.div`
+    display: flex;
+    align-items: center;
+
+    gap: ${formatPxToRem(8)}rem;
+`;
+
+export const CardActions = styled.div`
+    display: flex;
+    align-items: center;
+
+    gap: ${formatPxToRem(8)}rem;
+`;
+
+export const ActionButton = styled.button<{ variant: "status" | "delete" }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: ${formatPxToRem(32)}rem;
+    height: ${formatPxToRem(32)}rem;
+
+    border: none;
+    border-radius: ${formatPxToRem(6)}rem;
+    cursor: pointer;
+
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    background-color: ${({ theme, variant }) =>
+        variant === "delete"
+            ? theme.colors.red.default + "1A"
+            : theme.colors.green.default + "1A"};
+
+    &:hover {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
+`;

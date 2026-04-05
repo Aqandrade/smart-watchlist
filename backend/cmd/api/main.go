@@ -34,12 +34,13 @@ func main() {
 		DB:          db,
 		TMDBBaseURL: cfg.TMDBBaseURL,
 		TMDBAPIKey:  cfg.TMDBAPIKey,
+		JWTSecret:   cfg.JWTSecret,
 	})
 
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: false,
 	}))
