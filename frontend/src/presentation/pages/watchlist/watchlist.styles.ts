@@ -18,7 +18,9 @@ export const Container = styled.div`
 
 export const Header = styled.div`
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
 
     min-height: 12vh;
 
@@ -27,6 +29,27 @@ export const Header = styled.div`
     padding: ${formatPxToRem(24)}rem ${formatPxToRem(26)}rem;
 
     background-color: ${({ theme }) => theme.colors.purple.default};
+`;
+
+export const LogoutButton = styled.button`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: ${formatPxToRem(6)}rem;
+
+    border: none;
+    background: none;
+
+    cursor: pointer;
+
+    color: ${({ theme }) => theme.colors.white.default};
+
+    opacity: 0.85;
+
+    &:hover {
+        opacity: 1;
+    }
 `;
 
 export const Welcome = styled.div`

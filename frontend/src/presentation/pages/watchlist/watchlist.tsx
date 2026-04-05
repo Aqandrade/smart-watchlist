@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { Plus } from "@phosphor-icons/react";
+import { useNavigate } from "react-router-dom";
+import { Plus, SignOut } from "@phosphor-icons/react";
 import { Text } from "../../components/text/text";
 import { Loading } from "../../components/loading/loading";
 import { WatchlistCard } from "../../components/watchlist-card/watchlist-card";
@@ -9,17 +10,19 @@ import { MovieDetail } from "../../components/movie-detail/movie-detail";
 import { AddMovieForm } from "../../components/add-movie-form";
 import { ConfirmDeleteModal } from "../../components/confirm-delete-modal/confirm-delete-modal";
 import { WatchlistStatus } from "../../components/watchlist-card/watchlist-card.types";
+import { useAuth } from "../../contexts/auth/auth.context";
 import {
+    AddButton,
     Container,
     CustomText,
     Header,
     ListHeader,
     LoadingWrapper,
+    LogoutButton,
     Main,
     Movies,
     Welcome,
     EmptyState,
-    AddButton,
 } from "./watchlist.styles";
 import { IWatchlist } from "./watchlist.types";
 import { PageState } from "../../common/types";
@@ -33,6 +36,8 @@ export const Watchlist: React.FC<IWatchlist> = ({
     remoteUpdateWatchlistItemStatus,
     remoteDeleteWatchlistItem,
 }) => {
+    const navigate = useNavigate();
+    const { logout } = useAuth();
     const [pageState, setPageState] = useState<PageState>("loading");
     const [items, setItems] = useState<WatchlistItemModel[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -91,6 +96,11 @@ export const Watchlist: React.FC<IWatchlist> = ({
         await remoteDeleteWatchlistItem.delete({ entity_id: movieToDelete.entity_id });
         setMovieToDelete(null);
         loadWatchlist(currentPage);
+    };
+
+    const handleLogout = async () => {
+        await logout();
+        navigate("/login");
     };
 
     const renderContent = () => {
@@ -165,6 +175,16 @@ export const Watchlist: React.FC<IWatchlist> = ({
                         Smart Watchlist
                     </CustomText>
                 </Welcome>
+                <LogoutButton onClick={handleLogout}>
+                    <SignOut
+                        size={18}
+                        weight="bold"
+                        color={defaultTheme.colors.white.default}
+                    />
+                    <Text size="14" weight="500" color="white-default">
+                        Sair
+                    </Text>
+                </LogoutButton>
             </Header>
             <Main>
                 <ListHeader>
