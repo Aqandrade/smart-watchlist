@@ -15,6 +15,6 @@ func NewUpdateWatchlistItemStatusUseCase(watchlistRepo ports.WatchlistRepository
 	return &UpdateWatchlistItemStatusUseCase{watchlistRepo: watchlistRepo}
 }
 
-func (uc *UpdateWatchlistItemStatusUseCase) Execute(ctx context.Context, entityID string, status entities.WatchlistStatus) (*entities.Watchlist, error) {
-	return uc.watchlistRepo.UpdateStatus(ctx, entityID, hardcodedUserID, status)
+func (uc *UpdateWatchlistItemStatusUseCase) Execute(ctx context.Context, userID int, entityID string, status entities.WatchlistStatus) (*entities.Watchlist, error) {
+	return uc.watchlistRepo.UpdateStatus(ctx, entityID, userID, status)
 }

@@ -10,6 +10,12 @@ import (
 const defaultPage = 1
 const defaultPageSize = 20
 
+type ListWatchlistInput struct {
+	UserID   int
+	Page     int
+	PageSize int
+}
+
 type ListWatchlistUseCase struct {
 	watchlistRepo ports.WatchlistRepository
 }
@@ -18,13 +24,13 @@ func NewListWatchlistUseCase(watchlistRepo ports.WatchlistRepository) *ListWatch
 	return &ListWatchlistUseCase{watchlistRepo: watchlistRepo}
 }
 
-func (uc *ListWatchlistUseCase) Execute(ctx context.Context, page, pageSize int) ([]entities.WatchlistItem, int, error) {
-	if page < 1 {
-		page = defaultPage
+func (uc *ListWatchlistUseCase) Execute(ctx context.Context, input ListWatchlistInput) ([]entities.WatchlistItem, int, error) {
+	if input.Page < 1 {
+		input.Page = defaultPage
 	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = defaultPageSize
+	if input.PageSize < 1 || input.PageSize > 100 {
+		input.PageSize = defaultPageSize
 	}
 
-	return uc.watchlistRepo.ListWatchlist(ctx, hardcodedUserID, page, pageSize)
+	return uc.watchlistRepo.ListWatchlist(ctx, input.UserID, input.Page, input.PageSize)
 }

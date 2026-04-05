@@ -12,8 +12,6 @@ import (
 	"github.com/Aqandrade/smart-watchlist/internal/domain/services"
 )
 
-const hardcodedUserID = 1
-
 type AddMovieToWatchlistUseCase struct {
 	movieRepo              ports.MovieRepository
 	watchlistRepo          ports.WatchlistRepository
@@ -41,7 +39,7 @@ func NewAddMovieToWatchlistUseCase(
 	}
 }
 
-func (uc *AddMovieToWatchlistUseCase) Execute(ctx context.Context, movieName string) (*entities.Watchlist, error) {
+func (uc *AddMovieToWatchlistUseCase) Execute(ctx context.Context, userID int, movieName string) (*entities.Watchlist, error) {
 	movie, err := uc.movieRepo.FindByName(ctx, movieName)
 	if err != nil && !errors.Is(err, entities.ErrMovieNotFound) {
 		return nil, err
@@ -54,7 +52,7 @@ func (uc *AddMovieToWatchlistUseCase) Execute(ctx context.Context, movieName str
 		}
 	}
 
-	_, err = uc.watchlistRepo.FindByMovieIDAndUserID(ctx, movie.ID, hardcodedUserID)
+	_, err = uc.watchlistRepo.FindByMovieIDAndUserID(ctx, movie.ID, userID)
 	if err != nil && !errors.Is(err, entities.ErrWatchlistNotFound) {
 		return nil, err
 	}
@@ -65,7 +63,7 @@ func (uc *AddMovieToWatchlistUseCase) Execute(ctx context.Context, movieName str
 	watchlist := &entities.Watchlist{
 		EntityID: uuid.NewString(),
 		MovieID:  movie.ID,
-		UserID:   hardcodedUserID,
+		UserID:   userID,
 		Status:   entities.WatchlistStatusPending,
 	}
 

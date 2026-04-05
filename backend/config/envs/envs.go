@@ -10,6 +10,7 @@ type Config struct {
 	DatabaseURL string
 	TMDBBaseURL string
 	TMDBAPIKey  string
+	JWTSecret   string
 }
 
 func Load() (*Config, error) {
@@ -18,6 +19,7 @@ func Load() (*Config, error) {
 		DatabaseURL: os.Getenv("DATABASE_URL"),
 		TMDBBaseURL: getEnv("TMDB_BASE_URL", "https://api.themoviedb.org/3"),
 		TMDBAPIKey:  os.Getenv("TMDB_API_KEY"),
+		JWTSecret:   os.Getenv("JWT_SECRET"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -26,6 +28,10 @@ func Load() (*Config, error) {
 
 	if cfg.TMDBAPIKey == "" {
 		return nil, fmt.Errorf("TMDB_API_KEY is required")
+	}
+
+	if cfg.JWTSecret == "" {
+		return nil, fmt.Errorf("JWT_SECRET is required")
 	}
 
 	return cfg, nil

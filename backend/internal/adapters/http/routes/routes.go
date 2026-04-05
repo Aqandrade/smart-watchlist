@@ -4,14 +4,23 @@ import (
 	"github.com/gin-gonic/gin"
 
 	appsetup "github.com/Aqandrade/smart-watchlist/config/application"
+	"github.com/Aqandrade/smart-watchlist/internal/adapters/http/middlewares"
 )
 
 func SetupRoutes(router *gin.Engine, container *appsetup.Container) {
 	v1 := router.Group("/v1")
 
-	v1.POST("/watchlist", container.WatchlistHandler.AddMovie)
-	v1.GET("/watchlist", container.WatchlistHandler.List)
-	v1.PATCH("/watchlist/:watchlistItemId", container.WatchlistHandler.UpdateItemStatus)
-	v1.DELETE("/watchlist/:watchlistItemId", container.WatchlistHandler.DeleteItem)
-	v1.GET("/movies/search", container.MovieHandler.Search)
+	auth := v1.Group("/auth")
+	auth.POST("/register", container.AuthHandler.Register)
+	auth.POST("/login", container.AuthHandler.Login)
+	auth.POST("/refresh", container.AuthHandler.Refresh)
+	auth.POST("/logout", container.AuthHandler.Logout)
+
+	protected := v1.Group("")
+	protected.Use(middlewares.Auth(container.TokenProvider))
+	protected.POST("/watchlist", container.WatchlistHandler.AddMovie)
+	protected.GET("/watchlist", container.WatchlistHandler.List)
+	protected.PATCH("/watchlist/:watchlistItemId", container.WatchlistHandler.UpdateItemStatus)
+	protected.DELETE("/watchlist/:watchlistItemId", container.WatchlistHandler.DeleteItem)
+	protected.GET("/movies/search", container.MovieHandler.Search)
 }

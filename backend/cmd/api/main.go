@@ -34,6 +34,7 @@ func main() {
 		DB:          db,
 		TMDBBaseURL: cfg.TMDBBaseURL,
 		TMDBAPIKey:  cfg.TMDBAPIKey,
+		JWTSecret:   cfg.JWTSecret,
 	})
 
 	router := gin.Default()

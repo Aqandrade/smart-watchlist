@@ -14,6 +14,6 @@ func NewDeleteWatchlistItemUseCase(watchlistRepo ports.WatchlistRepository) *Del
 	return &DeleteWatchlistItemUseCase{watchlistRepo: watchlistRepo}
 }
 
-func (uc *DeleteWatchlistItemUseCase) Execute(ctx context.Context, entityID string) error {
-	return uc.watchlistRepo.Delete(ctx, entityID, hardcodedUserID)
+func (uc *DeleteWatchlistItemUseCase) Execute(ctx context.Context, userID int, entityID string) error {
+	return uc.watchlistRepo.Delete(ctx, entityID, userID)
 }

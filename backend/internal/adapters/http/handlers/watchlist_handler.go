@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/Aqandrade/smart-watchlist/internal/adapters/http/middlewares"
 	"github.com/Aqandrade/smart-watchlist/internal/adapters/http/requests"
 	"github.com/Aqandrade/smart-watchlist/internal/adapters/http/responses"
 	"github.com/Aqandrade/smart-watchlist/internal/application/usecases"
@@ -49,7 +50,8 @@ func (h *WatchlistHandler) AddMovie(c *gin.Context) {
 		return
 	}
 
-	watchlist, err := h.addMovieUseCase.Execute(c.Request.Context(), req.MovieName)
+	userID := c.GetInt(middlewares.UserIDKey)
+	watchlist, err := h.addMovieUseCase.Execute(c.Request.Context(), userID, req.MovieName)
 	if err != nil {
 		status := h.mapErrorToStatus(err)
 		c.JSON(status, gin.H{"error": err.Error()})
@@ -68,7 +70,11 @@ func (h *WatchlistHandler) List(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-	items, total, err := h.listWatchlistUseCase.Execute(c.Request.Context(), page, pageSize)
+	items, total, err := h.listWatchlistUseCase.Execute(c.Request.Context(), usecases.ListWatchlistInput{
+		UserID:   c.GetInt(middlewares.UserIDKey),
+		Page:     page,
+		PageSize: pageSize,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -113,7 +119,8 @@ func (h *WatchlistHandler) UpdateItemStatus(c *gin.Context) {
 		return
 	}
 
-	watchlist, err := h.updateItemStatusUseCase.Execute(c.Request.Context(), watchlistItemID, status)
+	userID := c.GetInt(middlewares.UserIDKey)
+	watchlist, err := h.updateItemStatusUseCase.Execute(c.Request.Context(), userID, watchlistItemID, status)
 	if err != nil {
 		httpStatus := h.mapErrorToStatus(err)
 		c.JSON(httpStatus, gin.H{"error": err.Error()})
@@ -129,8 +136,9 @@ func (h *WatchlistHandler) UpdateItemStatus(c *gin.Context) {
 
 func (h *WatchlistHandler) DeleteItem(c *gin.Context) {
 	watchlistItemID := c.Param("watchlistItemId")
+	userID := c.GetInt(middlewares.UserIDKey)
 
-	if err := h.deleteItemUseCase.Execute(c.Request.Context(), watchlistItemID); err != nil {
+	if err := h.deleteItemUseCase.Execute(c.Request.Context(), userID, watchlistItemID); err != nil {
 		httpStatus := h.mapErrorToStatus(err)
 		c.JSON(httpStatus, gin.H{"error": err.Error()})
 		return
