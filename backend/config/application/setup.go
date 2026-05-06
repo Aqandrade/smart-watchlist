@@ -20,10 +20,11 @@ type Config struct {
 }
 
 type Container struct {
-	WatchlistHandler *handlers.WatchlistHandler
-	MovieHandler     *handlers.MovieHandler
-	AuthHandler      *handlers.AuthHandler
-	TokenProvider    ports.TokenProvider
+	WatchlistHandler    *handlers.WatchlistHandler
+	MovieHandler        *handlers.MovieHandler
+	AuthHandler         *handlers.AuthHandler
+	SubscriptionHandler *handlers.SubscriptionHandler
+	TokenProvider       ports.TokenProvider
 }
 
 func NewContainer(cfg Config) *Container {
@@ -46,15 +47,21 @@ func NewContainer(cfg Config) *Container {
 	deleteItemUseCase := usecases.NewDeleteWatchlistItemUseCase(watchlistRepo)
 	searchMoviesUseCase := usecases.NewSearchMoviesUseCase(tmdbClient)
 
+	subscriptionRepo := repositories.NewSubscriptionRepository(cfg.DB)
+	listSubscriptionsUseCase := usecases.NewListSubscriptionsUseCase(subscriptionRepo)
+	addSubscriptionUseCase := usecases.NewAddSubscriptionUseCase(subscriptionRepo, providerRepo)
+	updateSubscriptionStatusUseCase := usecases.NewUpdateSubscriptionStatusUseCase(subscriptionRepo)
+
 	registerUseCase := usecases.NewRegisterUserUseCase(userRepo)
 	loginUseCase := usecases.NewLoginUserUseCase(userRepo, tokenRepo, tokenProvider)
 	refreshTokenUseCase := usecases.NewRefreshTokenUseCase(tokenRepo, tokenProvider)
 	logoutUseCase := usecases.NewLogoutUserUseCase(tokenRepo, tokenProvider)
 
 	return &Container{
-		WatchlistHandler: handlers.NewWatchlistHandler(addMovieUseCase, listWatchlistUseCase, updateItemStatusUseCase, deleteItemUseCase),
-		MovieHandler:     handlers.NewMovieHandler(searchMoviesUseCase),
-		AuthHandler:      handlers.NewAuthHandler(registerUseCase, loginUseCase, refreshTokenUseCase, logoutUseCase),
-		TokenProvider:    tokenProvider,
+		WatchlistHandler:    handlers.NewWatchlistHandler(addMovieUseCase, listWatchlistUseCase, updateItemStatusUseCase, deleteItemUseCase),
+		MovieHandler:        handlers.NewMovieHandler(searchMoviesUseCase),
+		AuthHandler:         handlers.NewAuthHandler(registerUseCase, loginUseCase, refreshTokenUseCase, logoutUseCase),
+		SubscriptionHandler: handlers.NewSubscriptionHandler(listSubscriptionsUseCase, addSubscriptionUseCase, updateSubscriptionStatusUseCase),
+		TokenProvider:       tokenProvider,
 	}
 }
