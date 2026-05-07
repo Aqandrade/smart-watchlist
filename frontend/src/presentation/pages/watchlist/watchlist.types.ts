@@ -1,9 +1,12 @@
 import {
-    ListWatchlistCase,
     AddMovieToWatchlistCase,
-    SearchMoviesCase,
-    UpdateWatchlistItemStatusCase,
+    AddSubscriptionCase,
     DeleteWatchlistItemCase,
+    ListSubscriptionsCase,
+    ListWatchlistCase,
+    SearchMoviesCase,
+    UpdateSubscriptionStatusCase,
+    UpdateWatchlistItemStatusCase,
 } from "../../../domain/usecases";
 
 export interface IWatchlist {
@@ -12,4 +15,7 @@ export interface IWatchlist {
     remoteSearchMovies: SearchMoviesCase;
     remoteUpdateWatchlistItemStatus: UpdateWatchlistItemStatusCase;
     remoteDeleteWatchlistItem: DeleteWatchlistItemCase;
+    remoteListSubscriptions: ListSubscriptionsCase;
+    remoteAddSubscription: AddSubscriptionCase;
+    remoteUpdateSubscriptionStatus: UpdateSubscriptionStatusCase;
 }

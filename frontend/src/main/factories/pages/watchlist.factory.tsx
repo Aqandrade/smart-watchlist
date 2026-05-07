@@ -1,10 +1,13 @@
 import { Watchlist } from "../../../presentation/pages/watchlist/watchlist";
 import {
-    makeRemoteListWatchlist,
     makeRemoteAddMovieToWatchlist,
-    makeRemoteSearchMovies,
-    makeRemoteUpdateWatchlistItemStatus,
+    makeRemoteAddSubscription,
     makeRemoteDeleteWatchlistItem,
+    makeRemoteListSubscriptions,
+    makeRemoteListWatchlist,
+    makeRemoteSearchMovies,
+    makeRemoteUpdateSubscriptionStatus,
+    makeRemoteUpdateWatchlistItemStatus,
 } from "../usecases";
 
 export const makeWatchlistPage = () => {
@@ -15,6 +18,9 @@ export const makeWatchlistPage = () => {
             remoteSearchMovies={makeRemoteSearchMovies()}
             remoteUpdateWatchlistItemStatus={makeRemoteUpdateWatchlistItemStatus()}
             remoteDeleteWatchlistItem={makeRemoteDeleteWatchlistItem()}
+            remoteListSubscriptions={makeRemoteListSubscriptions()}
+            remoteAddSubscription={makeRemoteAddSubscription()}
+            remoteUpdateSubscriptionStatus={makeRemoteUpdateSubscriptionStatus()}
         />
     );
 };
