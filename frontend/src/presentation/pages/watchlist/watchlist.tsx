@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, SignOut } from "@phosphor-icons/react";
+import { Plus, SignOut, MonitorPlay } from "@phosphor-icons/react";
 import { Text } from "../../components/text/text";
 import { Loading } from "../../components/loading/loading";
 import { WatchlistCard } from "../../components/watchlist-card/watchlist-card";
@@ -9,6 +9,7 @@ import { Modal } from "../../components/modal/modal";
 import { MovieDetail } from "../../components/movie-detail/movie-detail";
 import { AddMovieForm } from "../../components/add-movie-form";
 import { ConfirmDeleteModal } from "../../components/confirm-delete-modal/confirm-delete-modal";
+import { SubscriptionManagement } from "../../components/subscription-management";
 import { WatchlistStatus } from "../../components/watchlist-card/watchlist-card.types";
 import { useAuth } from "../../contexts/auth/auth.context";
 import {
@@ -35,6 +36,9 @@ export const Watchlist: React.FC<IWatchlist> = ({
     remoteSearchMovies,
     remoteUpdateWatchlistItemStatus,
     remoteDeleteWatchlistItem,
+    remoteListSubscriptions,
+    remoteAddSubscription,
+    remoteUpdateSubscriptionStatus,
 }) => {
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -46,6 +50,7 @@ export const Watchlist: React.FC<IWatchlist> = ({
     const [selectedMovie, setSelectedMovie] = useState<WatchlistItemModel | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [movieToDelete, setMovieToDelete] = useState<WatchlistItemModel | null>(null);
+    const [isSubscriptionsModalOpen, setIsSubscriptionsModalOpen] = useState(false);
 
     const loadWatchlist = useCallback(
         async (page: number) => {
@@ -191,6 +196,16 @@ export const Watchlist: React.FC<IWatchlist> = ({
                     <Text size="18" weight="500">
                         Meus Filmes
                     </Text>
+                    <AddButton onClick={() => setIsSubscriptionsModalOpen(true)}>
+                        <MonitorPlay
+                            size={18}
+                            weight="bold"
+                            color={defaultTheme.colors.purple.default}
+                        />
+                        <Text size="14" weight="600" color="purple-default">
+                            Assinaturas
+                        </Text>
+                    </AddButton>
                     <AddButton onClick={() => setIsAddModalOpen(true)}>
                         <Plus
                             size={18}
@@ -246,6 +261,18 @@ export const Watchlist: React.FC<IWatchlist> = ({
                         onCancel={() => setMovieToDelete(null)}
                     />
                 )}
+            </Modal>
+
+            <Modal
+                isOpen={isSubscriptionsModalOpen}
+                onClose={() => setIsSubscriptionsModalOpen(false)}
+            >
+                <SubscriptionManagement
+                    remoteListSubscriptions={remoteListSubscriptions}
+                    remoteAddSubscription={remoteAddSubscription}
+                    remoteUpdateSubscriptionStatus={remoteUpdateSubscriptionStatus}
+                    onClose={() => setIsSubscriptionsModalOpen(false)}
+                />
             </Modal>
         </Container>
     );

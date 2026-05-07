@@ -11,6 +11,9 @@ var (
 	ErrWatchProviderNotFound   = errors.New("watch providers not found on external provider")
 	ErrProviderNotFound        = errors.New("provider not found")
 
+	ErrSubscriptionNotFound      = errors.New("subscription not found")
+	ErrSubscriptionAlreadyExists = errors.New("subscription already exists")
+
 	ErrUserNotFound       = errors.New("user not found")
 	ErrUserAlreadyExists  = errors.New("user already exists")
 	ErrInvalidCredentials = errors.New("invalid credentials")
