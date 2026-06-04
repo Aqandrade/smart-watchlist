@@ -10,3 +10,4 @@ export * from "./remote-register.factory";
 export * from "./remote-search-movies.factory";
 export * from "./remote-update-subscription-status.factory";
 export * from "./remote-update-watchlist-item-status.factory";
+export * from "./remote-get-recommendation.factory";

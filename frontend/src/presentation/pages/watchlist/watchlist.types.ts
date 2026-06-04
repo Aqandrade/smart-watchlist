@@ -2,6 +2,7 @@ import {
     AddMovieToWatchlistCase,
     AddSubscriptionCase,
     DeleteWatchlistItemCase,
+    GetRecommendationCase,
     ListSubscriptionsCase,
     ListWatchlistCase,
     SearchMoviesCase,
@@ -18,4 +19,5 @@ export interface IWatchlist {
     remoteListSubscriptions: ListSubscriptionsCase;
     remoteAddSubscription: AddSubscriptionCase;
     remoteUpdateSubscriptionStatus: UpdateSubscriptionStatusCase;
+    remoteGetRecommendation: GetRecommendationCase;
 }

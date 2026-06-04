@@ -6,3 +6,4 @@ export * from "./movie-search-result-model";
 export * from "./subscription-model";
 export * from "./watchlist-item-model";
 export * from "./watchlist-model";
+export * from "./recommendation-model";

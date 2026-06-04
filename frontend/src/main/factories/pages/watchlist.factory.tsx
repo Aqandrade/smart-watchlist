@@ -3,6 +3,7 @@ import {
     makeRemoteAddMovieToWatchlist,
     makeRemoteAddSubscription,
     makeRemoteDeleteWatchlistItem,
+    makeRemoteGetRecommendation,
     makeRemoteListSubscriptions,
     makeRemoteListWatchlist,
     makeRemoteSearchMovies,
@@ -21,6 +22,7 @@ export const makeWatchlistPage = () => {
             remoteListSubscriptions={makeRemoteListSubscriptions()}
             remoteAddSubscription={makeRemoteAddSubscription()}
             remoteUpdateSubscriptionStatus={makeRemoteUpdateSubscriptionStatus()}
+            remoteGetRecommendation={makeRemoteGetRecommendation()}
         />
     );
 };

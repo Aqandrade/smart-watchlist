@@ -51,6 +51,7 @@ func NewContainer(cfg Config) *Container {
 	listSubscriptionsUseCase := usecases.NewListSubscriptionsUseCase(subscriptionRepo)
 	addSubscriptionUseCase := usecases.NewAddSubscriptionUseCase(subscriptionRepo, providerRepo)
 	updateSubscriptionStatusUseCase := usecases.NewUpdateSubscriptionStatusUseCase(subscriptionRepo)
+	getRecommendationUseCase := usecases.NewGetMovieRecommendationUseCase(watchlistRepo)
 
 	registerUseCase := usecases.NewRegisterUserUseCase(userRepo)
 	loginUseCase := usecases.NewLoginUserUseCase(userRepo, tokenRepo, tokenProvider)
@@ -58,7 +59,7 @@ func NewContainer(cfg Config) *Container {
 	logoutUseCase := usecases.NewLogoutUserUseCase(tokenRepo, tokenProvider)
 
 	return &Container{
-		WatchlistHandler:    handlers.NewWatchlistHandler(addMovieUseCase, listWatchlistUseCase, updateItemStatusUseCase, deleteItemUseCase),
+		WatchlistHandler:    handlers.NewWatchlistHandler(addMovieUseCase, listWatchlistUseCase, updateItemStatusUseCase, deleteItemUseCase, getRecommendationUseCase),
 		MovieHandler:        handlers.NewMovieHandler(searchMoviesUseCase),
 		AuthHandler:         handlers.NewAuthHandler(registerUseCase, loginUseCase, refreshTokenUseCase, logoutUseCase),
 		SubscriptionHandler: handlers.NewSubscriptionHandler(listSubscriptionsUseCase, addSubscriptionUseCase, updateSubscriptionStatusUseCase),

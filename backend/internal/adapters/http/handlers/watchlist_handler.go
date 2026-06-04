@@ -15,11 +15,15 @@ import (
 )
 
 var errorStatusMap = map[error]int{
-	entities.ErrMovieNotFoundOnProvider: http.StatusFailedDependency,
-	entities.ErrProviderUnavailable:     http.StatusFailedDependency,
-	entities.ErrWatchProviderNotFound:   http.StatusFailedDependency,
-	entities.ErrMovieAlreadyInWatchlist: http.StatusConflict,
-	entities.ErrWatchlistNotFound:       http.StatusNotFound,
+	entities.ErrMovieNotFoundOnProvider:            http.StatusFailedDependency,
+	entities.ErrProviderUnavailable:                http.StatusFailedDependency,
+	entities.ErrWatchProviderNotFound:              http.StatusFailedDependency,
+	entities.ErrMovieAlreadyInWatchlist:            http.StatusConflict,
+	entities.ErrWatchlistNotFound:                  http.StatusNotFound,
+	entities.ErrNoMoviesInWatchlist:                 http.StatusUnprocessableEntity,
+	entities.ErrNoActiveSubscriptions:               http.StatusUnprocessableEntity,
+	entities.ErrNoMoviesMatchingActiveSubscriptions: http.StatusUnprocessableEntity,
+	entities.ErrNoMoviesMatchingDuration:            http.StatusUnprocessableEntity,
 }
 
 type WatchlistHandler struct {
@@ -27,6 +31,7 @@ type WatchlistHandler struct {
 	listWatchlistUseCase    *usecases.ListWatchlistUseCase
 	updateItemStatusUseCase *usecases.UpdateWatchlistItemStatusUseCase
 	deleteItemUseCase       *usecases.DeleteWatchlistItemUseCase
+	getRecommendationUseCase *usecases.GetMovieRecommendationUseCase
 }
 
 func NewWatchlistHandler(
@@ -34,12 +39,14 @@ func NewWatchlistHandler(
 	listWatchlistUseCase *usecases.ListWatchlistUseCase,
 	updateItemStatusUseCase *usecases.UpdateWatchlistItemStatusUseCase,
 	deleteItemUseCase *usecases.DeleteWatchlistItemUseCase,
+	getRecommendationUseCase *usecases.GetMovieRecommendationUseCase,
 ) *WatchlistHandler {
 	return &WatchlistHandler{
-		addMovieUseCase:         addMovieUseCase,
-		listWatchlistUseCase:    listWatchlistUseCase,
-		updateItemStatusUseCase: updateItemStatusUseCase,
-		deleteItemUseCase:       deleteItemUseCase,
+		addMovieUseCase:          addMovieUseCase,
+		listWatchlistUseCase:     listWatchlistUseCase,
+		updateItemStatusUseCase:  updateItemStatusUseCase,
+		deleteItemUseCase:        deleteItemUseCase,
+		getRecommendationUseCase: getRecommendationUseCase,
 	}
 }
 
@@ -145,6 +152,39 @@ func (h *WatchlistHandler) DeleteItem(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (h *WatchlistHandler) GetRecommendation(c *gin.Context) {
+	userID := c.GetInt(middlewares.UserIDKey)
+
+	var maxDuration *int16
+	if raw := c.Query("max_duration"); raw != "" {
+		val, err := strconv.ParseInt(raw, 10, 16)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "max_duration must be a valid integer (minutes)"})
+			return
+		}
+		v := int16(val)
+		maxDuration = &v
+	}
+
+	item, err := h.getRecommendationUseCase.Execute(c.Request.Context(), userID, maxDuration)
+	if err != nil {
+		c.JSON(h.mapErrorToStatus(err), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.RecommendationResponse{
+		EntityID:             item.EntityID,
+		MovieName:            item.MovieName,
+		MovieDescription:     item.MovieDescription,
+		MovieDirector:        item.MovieDirector,
+		MovieReleaseDate:     item.MovieReleaseDate,
+		MovieDuration:        item.MovieDuration,
+		ExternalSourceRating: item.ExternalSourceRating,
+		Providers:            item.Providers,
+		Status:               string(item.Status),
+	})
 }
 
 func (h *WatchlistHandler) mapErrorToStatus(err error) int {

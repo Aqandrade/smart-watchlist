@@ -31,6 +31,7 @@ func setAuthRoutes(v1 *gin.RouterGroup, container *appsetup.Container) {
 func setWatchlistRoutes(protected *gin.RouterGroup, container *appsetup.Container) {
 	protected.POST("/watchlist", container.WatchlistHandler.AddMovie)
 	protected.GET("/watchlist", container.WatchlistHandler.List)
+	protected.GET("/watchlist/recommendation", container.WatchlistHandler.GetRecommendation)
 	protected.PATCH("/watchlist/:watchlistItemId", container.WatchlistHandler.UpdateItemStatus)
 	protected.DELETE("/watchlist/:watchlistItemId", container.WatchlistHandler.DeleteItem)
 }

@@ -14,3 +14,10 @@ type WatchlistItem struct {
 	Providers            []string
 	CreatedAt            time.Time
 }
+
+type RecommendationCandidate struct {
+	TotalUnwatched  int
+	ActiveSubsCount int
+	MatchedCount    int
+	Movie           *WatchlistItem // nil when duration filter eliminates all matches
+}

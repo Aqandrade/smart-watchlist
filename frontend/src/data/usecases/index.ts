@@ -10,3 +10,4 @@ export * from "./remote-register";
 export * from "./remote-search-movies";
 export * from "./remote-update-subscription-status";
 export * from "./remote-update-watchlist-item-status";
+export * from "./remote-get-recommendation";

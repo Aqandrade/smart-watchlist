@@ -122,6 +122,74 @@ func (r *watchlistRepository) ListWatchlist(ctx context.Context, userID, page, p
 	return items, total, nil
 }
 
+func (r *watchlistRepository) FindRecommendation(ctx context.Context, userID int, maxDuration *int16) (*entities.RecommendationCandidate, error) {
+	countsQuery := `
+		SELECT
+			(SELECT COUNT(*) FROM watchlist WHERE user_id = $1 AND status = 'PENDING') AS total_unwatched,
+			(SELECT COUNT(*) FROM subscriptions WHERE user_id = $1 AND active = true) AS active_subs_count,
+			(
+				SELECT COUNT(*)
+				FROM watchlist w
+				INNER JOIN movie m ON m.id = w.movie_id
+				WHERE w.user_id = $1 AND w.status = 'PENDING'
+				  AND EXISTS (
+				      SELECT 1 FROM movie_watch_providers mwp
+				      INNER JOIN subscriptions s ON s.provider_id = mwp.provider_id
+				      WHERE mwp.movie_id = m.id AND s.user_id = $1 AND s.active = true
+				  )
+			) AS matched_count`
+
+	candidate := &entities.RecommendationCandidate{}
+	if err := r.db.QueryRowContext(ctx, countsQuery, userID).Scan(
+		&candidate.TotalUnwatched, &candidate.ActiveSubsCount, &candidate.MatchedCount,
+	); err != nil {
+		return nil, err
+	}
+
+	if candidate.TotalUnwatched == 0 || candidate.ActiveSubsCount == 0 || candidate.MatchedCount == 0 {
+		return candidate, nil
+	}
+
+	movieQuery := `
+		SELECT w.entity_id, m.id, m.name, m.description, m.director,
+		       m.release_date, m.duration, m.external_source_rating, w.status, w.created_at
+		FROM watchlist w
+		INNER JOIN movie m ON m.id = w.movie_id
+		WHERE w.user_id = $1
+		  AND w.status = 'PENDING'
+		  AND ($2::SMALLINT IS NULL OR m.duration <= $2)
+		  AND EXISTS (
+		      SELECT 1 FROM movie_watch_providers mwp
+		      INNER JOIN subscriptions s ON s.provider_id = mwp.provider_id
+		      WHERE mwp.movie_id = m.id AND s.user_id = $1 AND s.active = true
+		  )
+		ORDER BY m.external_source_rating DESC, w.entity_id ASC
+		LIMIT 1`
+
+	var item entities.WatchlistItem
+	var movieID int
+	err := r.db.QueryRowContext(ctx, movieQuery, userID, maxDuration).Scan(
+		&item.EntityID, &movieID, &item.MovieName, &item.MovieDescription,
+		&item.MovieDirector, &item.MovieReleaseDate, &item.MovieDuration,
+		&item.ExternalSourceRating, &item.Status, &item.CreatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return candidate, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	providersMap, err := r.findProvidersByMovieIDs(ctx, []int{movieID})
+	if err != nil {
+		return nil, err
+	}
+	item.Providers = providersMap[movieID]
+	candidate.Movie = &item
+
+	return candidate, nil
+}
+
 func (r *watchlistRepository) UpdateStatus(ctx context.Context, entityID string, userID int, status entities.WatchlistStatus) (*entities.Watchlist, error) {
 	query := `
 		UPDATE watchlist

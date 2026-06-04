@@ -14,6 +14,11 @@ var (
 	ErrSubscriptionNotFound      = errors.New("subscription not found")
 	ErrSubscriptionAlreadyExists = errors.New("subscription already exists")
 
+	ErrNoMoviesInWatchlist                 = errors.New("no movies in watchlist")
+	ErrNoActiveSubscriptions               = errors.New("no active subscriptions")
+	ErrNoMoviesMatchingActiveSubscriptions = errors.New("no movies matching active subscriptions")
+	ErrNoMoviesMatchingDuration            = errors.New("no movies matching duration criteria")
+
 	ErrUserNotFound       = errors.New("user not found")
 	ErrUserAlreadyExists  = errors.New("user already exists")
 	ErrInvalidCredentials = errors.New("invalid credentials")

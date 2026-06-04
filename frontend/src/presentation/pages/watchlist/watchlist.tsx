@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, SignOut, MonitorPlay } from "@phosphor-icons/react";
+import { Plus, SignOut, MonitorPlay, Sparkle } from "@phosphor-icons/react";
 import { Text } from "../../components/text/text";
 import { Loading } from "../../components/loading/loading";
 import { WatchlistCard } from "../../components/watchlist-card/watchlist-card";
@@ -10,6 +10,7 @@ import { MovieDetail } from "../../components/movie-detail/movie-detail";
 import { AddMovieForm } from "../../components/add-movie-form";
 import { ConfirmDeleteModal } from "../../components/confirm-delete-modal/confirm-delete-modal";
 import { SubscriptionManagement } from "../../components/subscription-management";
+import { SmartRecommendation } from "../../components/smart-recommendation";
 import { WatchlistStatus } from "../../components/watchlist-card/watchlist-card.types";
 import { useAuth } from "../../contexts/auth/auth.context";
 import {
@@ -39,6 +40,7 @@ export const Watchlist: React.FC<IWatchlist> = ({
     remoteListSubscriptions,
     remoteAddSubscription,
     remoteUpdateSubscriptionStatus,
+    remoteGetRecommendation,
 }) => {
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -51,6 +53,7 @@ export const Watchlist: React.FC<IWatchlist> = ({
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [movieToDelete, setMovieToDelete] = useState<WatchlistItemModel | null>(null);
     const [isSubscriptionsModalOpen, setIsSubscriptionsModalOpen] = useState(false);
+    const [isRecommendationModalOpen, setIsRecommendationModalOpen] = useState(false);
 
     const loadWatchlist = useCallback(
         async (page: number) => {
@@ -206,6 +209,16 @@ export const Watchlist: React.FC<IWatchlist> = ({
                             Assinaturas
                         </Text>
                     </AddButton>
+                    <AddButton onClick={() => setIsRecommendationModalOpen(true)}>
+                        <Sparkle
+                            size={18}
+                            weight="fill"
+                            color={defaultTheme.colors.purple.default}
+                        />
+                        <Text size="14" weight="600" color="purple-default">
+                            Recomendação Inteligente
+                        </Text>
+                    </AddButton>
                     <AddButton onClick={() => setIsAddModalOpen(true)}>
                         <Plus
                             size={18}
@@ -274,6 +287,13 @@ export const Watchlist: React.FC<IWatchlist> = ({
                     onClose={() => setIsSubscriptionsModalOpen(false)}
                 />
             </Modal>
+
+            <SmartRecommendation
+                isOpen={isRecommendationModalOpen}
+                onClose={() => setIsRecommendationModalOpen(false)}
+                remoteListSubscriptions={remoteListSubscriptions}
+                remoteGetRecommendation={remoteGetRecommendation}
+            />
         </Container>
     );
 };
